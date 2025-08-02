@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'spec_helper'
+
 RSpec.describe AssetDB::Resolver do
 	let(:db)    { AssetDB::Database.new }
 	let(:core)  { db.group('core').package('base').asset(:css, 'base.css') }

@@ -4,12 +4,12 @@ require_relative 'lib/asset_db/version'
 Gem::Specification.new do |spec|
 	spec.name          = 'asset_db'
 	spec.version       = AssetDB::VERSION
-	spec.authors       = ['Your Name']
-	spec.email         = ['your.email@example.com']
+	spec.authors       = ['Convincible Media']
+	spec.email         = ['development@convincible.media']
 
-	spec.summary       = 'Lightweight asset dependency database for Ruby'
-	spec.description   = File.read(File.expand_path('README.md', __dir__))
-	spec.homepage      = 'https://github.com/your_username/asset_db'
+	spec.summary       = "Lightweight asset dependency database for Ruby"
+	spec.description   = "Provides a structured way to define, organise, and resolve assets (CSS, JS, etc.) and their interdependencies across packages and groups."
+	spec.homepage      = 'https://github.com/ConvincibleMedia/ruby-gem-assetdb'
 	spec.license       = 'MIT'
 
 	spec.required_ruby_version = '>= 2.4'

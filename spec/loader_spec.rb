@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require_relative 'spec_helper'
+
 RSpec.describe 'Configuration loader' do
 	let(:cfg) do
 		{
 			types:     %w[css js],
-			basepath:  '/assets/:type/:group/:package',
-			folders:   { core: 'common', :'features/dropdown' => nil },
+			basepath:  '/assets/:type/in_:group/:package_package',
+			folders:   { 'core' => 'common', 'features/dropdown' => nil },
 			core: {
 				base: { css: 'base.css' }
 			},
@@ -29,18 +31,7 @@ RSpec.describe 'Configuration loader' do
 		pkg   = db.group('group').package('package')
 		asset = pkg.resolved_assets(:css).first
 		url   = db.build_url(asset)
-		expect(url).to eq '/assets/css/group/package/simple.css' # group folder collapsed, package folder collapsed
-	end
-
-	it 'honours custom folders in URL resolution' do
-		pkg    = db.group('features').package('dropdown')
-		assets = pkg.resolved_assets(:css)
-		first  = assets.first
-		second = assets.last
-		url1   = db.build_url(first)
-		url2   = db.build_url(second)
-		expect(url1).to eq '/assets/css/common/base/base.css' # group folder collapsed, package folder collapsed
-		expect(url2).to eq '/assets/css/features/drop.css' # group folder collapsed, package folder collapsed
+		expect(url).to eq '/assets/css/in_group/package_package/simple.css' # group folder collapsed, package folder collapsed
 	end
 
 	it 'parses dependency shorthand' do

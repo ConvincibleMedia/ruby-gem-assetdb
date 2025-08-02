@@ -116,6 +116,21 @@ module AssetDB
 				end
 				block ? @cache[key].each(&block) : @cache[key]
 			end
+
+			def each
+				return to_enum(:each) unless block_given?
+
+				seen = Set.new
+				@database.asset_types.each do |type|
+					each_asset(type).each do |asset|
+						next if seen.include?(asset.id)   # de-dupe across types just in case
+						seen << asset.id
+						yield asset
+					end
+				end
+				self
+			end
+
 		end
 	end
 end
