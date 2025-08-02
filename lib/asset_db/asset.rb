@@ -4,14 +4,15 @@ require 'uri'
 
 module AssetDB
 	class Asset
-		attr_reader :type, :id, :url, :metadata
+		attr_reader :type, :id, :url, :metadata, :group, :package
 
-		def initialize(type, url, metadata = nil, id: url)
+		def initialize(type:, group:, package:, url:, metadata: nil, id: url)
 			@type     = type.to_sym
 			@url      = url.to_s.freeze
 			@metadata = metadata
 			@id       = id.to_s.freeze
-			freeze
+			@package  = package
+			@group    = group
 		end
 
 		def ==(other)

@@ -3,7 +3,7 @@
 RSpec.describe AssetDB::Resolver do
 	let(:db)    { AssetDB::Database.new }
 	let(:core)  { db.group('core').package('base').asset(:css, 'base.css') }
-	let(:feat)  { db.group('features').package('dropdown').asset(:css, 'drop.css').depends_on('base', in: 'core') }
+	let(:feat)  { db.group('features').package('dropdown').asset(:css, 'drop.css').depends_on('base', group_id: 'core') }
 
 	before { core; feat } # build graph
 
@@ -13,7 +13,7 @@ RSpec.describe AssetDB::Resolver do
 
 	it 'deduplicates identical assets across deps' do
 		core2 = db.group('extras').package('core2').asset(:css, 'base.css')
-		feat.depends_on('core2', in: 'extras')
+		feat.depends_on('core2', group_id: 'extras')
 		expect(feat.resolved_assets(:css).map(&:id)).to eq %w[base.css drop.css]
 	end
 
@@ -23,7 +23,7 @@ RSpec.describe AssetDB::Resolver do
 	end
 
 	it 'detects cycles' do
-		core.depends_on('dropdown', in: 'features')
+		core.depends_on('dropdown', group_id: 'features')
 		expect { feat.resolved_assets(:css) }.to raise_error(AssetDB::Errors::CycleError)
 	end
 

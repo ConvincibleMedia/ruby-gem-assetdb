@@ -9,7 +9,7 @@ module AssetDB
 			attr_reader :cycle
 			def initialize(cycle)
 				@cycle = cycle
-				super("Dependency cycle detected: " \
+				super("Dependency cycle detected: " +
 				      cycle.map { |p| "#{p.group.id}:#{p.id}" }.join(' → '))
 			end
 		end

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'spec_helper'
+
 RSpec.describe AssetDB::Database do
 	let(:db) { described_class.new }
 

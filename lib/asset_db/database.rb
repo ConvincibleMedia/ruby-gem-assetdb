@@ -24,11 +24,11 @@ module AssetDB
 		end
 
 		def groups
-      @groups.values
-    end
+			@groups.values
+		end
 		def asset_types
-      @asset_types
-    end
+			@asset_types
+		end
 
 		# Strict fetch for resolver
 		def group!(id)
@@ -41,10 +41,12 @@ module AssetDB
 		end
 
 		# ---------------  URL expansion ---------------
-		def build_url(asset, group, package)
+		def build_url(asset)
 			return asset.url if asset.protocol_url?
 			return ensure_root_slash(asset.url) if asset.url.start_with?('/')
 
+			group  = asset.group
+			package = asset.package
 			path = @base_path.dup
 			unless path.empty?
 				path.gsub!(':type',    asset.type.to_s)
@@ -68,28 +70,40 @@ module AssetDB
 
 			cfg.each do |g_id, g_spec|
 				next if CONFIG_RESERVED.include?(g_id)
-
-				raise Errors::InvalidIdentifierError, "group name ‘#{g_id}’ conflicts with asset type" \
-					if db.asset_types.include?(g_id.to_sym)
-
-				group_folder = folders_map[g_id]
-				g            = db.group(g_id, folder: group_folder)
-				gid          = g_id.to_s
-
+			
+				raise Errors::InvalidIdentifierError,
+							"group name ‘#{g_id}’ conflicts with asset type" \
+							if db.asset_types.include?(g_id.to_sym)
+			
+				# ----------  GROUP ---------- #
+				if (folders_map.key? g_id)
+					g = db.group(g_id, folder: folders_map[g_id])           # explicit override (can be nil/false/empty)
+				else
+					g = db.group(g_id)                                      # default ⇒ id
+				end
+				gid = g_id.to_s
+			
+				# ----------  PACKAGES ---------- #
 				g_spec.each do |p_id, p_spec|
-					pkg_folder = folders_map["#{gid}/#{p_id}"]
-					pkg        = g.package(p_id, folder: pkg_folder)
-
+					p_key = "#{gid}/#{p_id}"                                # composite key for folder overrides
+			
+					if (folders_map.key? p_key)
+						pkg = g.package(p_id, folder: folders_map[p_key])   # explicit override
+					else
+						pkg = g.package(p_id)                               # default ⇒ id
+					end
+			
 					p_spec.each do |k, v|
 						key = k.to_s
-						if db.asset_types.include?(key.to_sym) # assets
+						if db.asset_types.include?(key.to_sym)              # ASSETS
 							Array(v).each { |url| pkg.asset(key, url) }
-						else                                   # dependencies
-							Array(v).each { |target_pkg| pkg.depends_on(target_pkg, in: key) }
+						else                                                # DEPENDENCIES
+							Array(v).each { |target_pkg| pkg.depends_on(target_pkg, group_id: key) }
 						end
 					end
 				end
 			end
+			
 			db
 		end
 	end

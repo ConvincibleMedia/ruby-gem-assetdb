@@ -19,13 +19,13 @@ module AssetDB
 		def asset(type, url, metadata = nil, id: url)
 			type = type.to_sym
 			check_type!(type)
-			@assets[type] << Asset.new(type, url, metadata, id: id)
+			@assets[type] << Asset.new(type: type, url: url, group: group, package: self, metadata: metadata, id: id)
 			invalidate_cache
 			self
 		end
 
-		def depends_on(pkg_id, in: group.id)
-			@dependencies << [in.to_s, pkg_id.to_s]
+		def depends_on(pkg_id, group_id: group.id)
+			@dependencies << [group_id.to_s, pkg_id.to_s]
 			invalidate_cache
 			self
 		end
@@ -46,23 +46,23 @@ module AssetDB
 		end
 
 		def assets
-      @assets
-    end
+			@assets
+		end
 		def dependencies
-      @dependencies
-    end
+			@dependencies
+		end
 		def key?
-      "#{group.id}/#{id}".freeze
-    end
+			"#{group.id}/#{id}".freeze
+		end
 
 		private
 
 		def invalidate_cache
-      @cache.clear
-    end
+			@cache.clear
+		end
 		def check_type!(t)
-      group.database.asset_types.include?(t) or raise ArgumentError, "Unknown type #{t}"
-    end
+			group.database.asset_types.include?(t) or raise ArgumentError, "Unknown type #{t}"
+		end
 
 		def validate_identifier!(name)
 			raise Errors::InvalidIdentifierError, "‘/’ forbidden in identifier #{name.inspect}" if name.to_s.include?('/')

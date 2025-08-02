@@ -52,7 +52,7 @@ db = AssetDB.build(asset_types: %i[css js], base_path: '/assets/:type/:group/:pa
 			p.asset :css, 'effect.css'
 			p.asset :js,  'foundation.js'
 			p.asset :js,  'drop.js'
-			p.depends_on 'base', in: 'core'
+			p.depends_on 'base', group_id: 'core'
 		end
 	end
 
@@ -67,7 +67,7 @@ dropdown = db.group('features').package('dropdown')
 css_list = dropdown.resolved_assets(:css)
 # => [ base.css, drop.css, effect.css ]
 css_list.each do |asset|
-	puts db.build_url(asset, dropdown.group, dropdown)
+	puts db.build_url(asset)
 end
 ```
 
@@ -94,6 +94,6 @@ combined = dropdown + base
 
 # Iterate all JS assets without duplicates
 combined.each_asset(:js).each do |asset|
-  puts db.build_url(asset, asset.group, asset.package)
+  puts db.build_url(asset)
 end
 ```
