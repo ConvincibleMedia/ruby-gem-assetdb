@@ -15,6 +15,7 @@ config = {
 	types: ['css', 'js'], # optional; default [:css, :js]
 	basepath: '/assets/:type/:group/:package', # optional
 	folders: { # optional
+		separator: '/' # must specify separator to be able to specify "group/package"
 		'features': 'myfeatures', # this group uses a different string in the basepath
 		'core/base': nil # this package is collapsed in the basepath
 	},

@@ -22,6 +22,8 @@ RSpec.describe AssetDB::Database do
 	end
 
 	it 'rejects separator in identifiers' do
+		expect { db.group('a/b') }.not_to raise_error
+		db.separator = '/'
 		expect { db.group('bad/name') }.to raise_error(AssetDB::Errors::InvalidIdentifierError)
 		expect { db.group('g').package('bad/name') }.to raise_error(AssetDB::Errors::InvalidIdentifierError)
 		db.separator = '|'

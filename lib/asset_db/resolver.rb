@@ -93,8 +93,7 @@ module AssetDB
 			end
 
 			def +(other)
-				other_pks = other.is_a?(PackageCollection) ? other.instance_variable_get(:@packages) : [other]
-				PackageCollection.new(@database, (@packages + other_pks).uniq)
+				@database.unify(self, other)
 			end
 
 			def each_asset(type = nil, &block)

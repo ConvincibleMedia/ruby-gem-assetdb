@@ -8,6 +8,7 @@ RSpec.describe 'Folder override precedence' do
 			types:     %w[css],
 			basepath:  '/a/:group/:package',      # keep short for assertions
 			folders:   {
+				'separator'       => '/',
 				'core'            => 'lib',
 				'core/base'       => nil,          # collapse package
 				'features'        => nil,
