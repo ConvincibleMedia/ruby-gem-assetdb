@@ -1,4 +1,6 @@
-# frozen_string_literal: true
+lib = File.expand_path("lib", __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 require_relative 'lib/asset_db/version'
 
 Gem::Specification.new do |spec|
@@ -15,9 +17,7 @@ Gem::Specification.new do |spec|
 	spec.required_ruby_version = '>= 2.4'
 
 	# Files to include in the gem
-	spec.files = Dir.chdir(__dir__) do
-		`git ls-files -z`.split("\x0").grep(%r{\A(?:lib|README\.md|LICENSE|asset_db\.gemspec)\z})
-	end
+	spec.files = Dir['lib/**/*.rb']
 
 	# No runtime dependencies
 	# Development dependencies

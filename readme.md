@@ -97,3 +97,11 @@ combined.each_asset(:js).each do |asset|
   puts db.build_url(asset)
 end
 ```
+
+You can also use the `unify` method directly with any number of packages or splat in an array of packages.
+
+```ruby
+combined = db.unify(base, dropdown, other)
+packages = [base, dropdown, other]
+combined = db.unify(*packages)
+```

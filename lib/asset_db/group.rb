@@ -7,7 +7,7 @@ module AssetDB
 		attr_reader :database, :id
 
 		def initialize(database, id, folder: FOLDER_DEFAULT)
-			validate_identifier!(id)
+			database.validate_identifier!(id)
 			@database      = database
 			@id            = id.to_s
 			@folder        = folder.equal?(FOLDER_DEFAULT) ? FOLDER_DEFAULT : folder
@@ -37,10 +37,5 @@ module AssetDB
 			@folder.to_s
 		end
 
-		private
-
-		def validate_identifier!(name)
-			raise Errors::InvalidIdentifierError, "‘/’ forbidden in identifier #{name.inspect}" if name.to_s.include?('/')
-		end
 	end
 end

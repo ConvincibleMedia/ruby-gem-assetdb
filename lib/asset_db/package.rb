@@ -7,8 +7,8 @@ module AssetDB
 		attr_reader :id, :group
 
 		def initialize(group, id, folder: FOLDER_DEFAULT)
-			validate_identifier!(id)
 			@group        = group
+			database.validate_identifier!(id)
 			@id           = id.to_s
 			@folder       = folder.equal?(FOLDER_DEFAULT) ? FOLDER_DEFAULT : folder
 			@assets       = Hash.new { |h, k| h[k] = [] }  # {type ⇒ [Asset]}
@@ -32,11 +32,11 @@ module AssetDB
 
 		def resolved_assets(type = nil)
 			key = type ? type.to_sym : :all
-			@cache[key] ||= group.database.resolver.resolve(self, type: type&.to_sym)
+			@cache[key] ||= database.resolver.resolve(self, type: type&.to_sym)
 		end
 
 		def +(other)
-			Resolver::PackageCollection.new(group.database, [self, other].flatten)
+			database.unify(self, other)
 		end
 
 		def folder_segment
@@ -54,6 +54,9 @@ module AssetDB
 		def key?
 			"#{group.id}/#{id}".freeze
 		end
+		def database
+			group.database
+		end
 
 		private
 
@@ -61,11 +64,8 @@ module AssetDB
 			@cache.clear
 		end
 		def check_type!(t)
-			group.database.asset_types.include?(t) or raise ArgumentError, "Unknown type #{t}"
+			database.asset_types.include?(t) or raise ArgumentError, "Unknown type #{t}"
 		end
 
-		def validate_identifier!(name)
-			raise Errors::InvalidIdentifierError, "‘/’ forbidden in identifier #{name.inspect}" if name.to_s.include?('/')
-		end
 	end
 end

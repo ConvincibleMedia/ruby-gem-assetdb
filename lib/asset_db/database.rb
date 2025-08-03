@@ -7,15 +7,17 @@ module AssetDB
 		CONFIG_RESERVED = %w[types basepath folders].freeze
 
 		attr_reader :asset_types, :base_path, :groups, :resolver
+		attr_accessor :separator
 
 		def initialize(asset_types: nil, base_path: nil)
 			@asset_types = (asset_types&.map(&:to_sym) || %i[css js]).freeze
 			@base_path   = (base_path || '').dup
+			@separator   = nil
 			@groups      = {} # {id ⇒ Group}
 			@resolver    = Resolver.new(self)
 		end
 
-		# ----------------  DSL helpers ----------------
+		# DSL helpers
 		G_FOLDER_DEFAULT = Group::FOLDER_DEFAULT
 		def group(id, folder: G_FOLDER_DEFAULT, &block)
 			g = (@groups[id.to_s] ||= Group.new(self, id, folder: folder))
@@ -66,7 +68,10 @@ module AssetDB
 			cfg = cfg.transform_keys(&:to_s)
 			db  = new(asset_types: cfg['types'], base_path: cfg['basepath'])
 
-			folders_map = (cfg['folders'] || {}).transform_keys(&:to_s)
+			folders_map = (cfg['folders'] || {}).transform_keys(&:to_s).dup
+			if sep = folders_map.delete('separator')
+				db.separator = sep.to_s
+			end
 
 			cfg.each do |g_id, g_spec|
 				next if CONFIG_RESERVED.include?(g_id)
@@ -85,7 +90,7 @@ module AssetDB
 			
 				# ----------  PACKAGES ---------- #
 				g_spec.each do |p_id, p_spec|
-					p_key = "#{gid}/#{p_id}"                                # composite key for folder overrides
+					p_key = "#{gid}#{db.separator}#{p_id}"                                # composite key for folder overrides
 			
 					if (folders_map.key? p_key)
 						pkg = g.package(p_id, folder: folders_map[p_key])   # explicit override
@@ -106,5 +111,28 @@ module AssetDB
 			
 			db
 		end
+
+		# Unify any number (≥2) of Package or PackageCollection into one collection
+		def unify(*items)
+			raise ArgumentError, "unify requires ≥2 packages/collections" if items.size < 2
+			merged = items.flat_map do |i|
+			case i
+				when Resolver::PackageCollection
+					i.instance_variable_get(:@packages)
+				when Package
+					[i]
+				else
+					raise ArgumentError, "Cannot unify #{i.inspect}"
+				end
+			end
+			Resolver::PackageCollection.new(self, merged)
+		end
+
+		def validate_identifier!(name)
+			if separator && name.to_s.include?(separator)
+				raise Errors::InvalidIdentifierError, "'#{separator}' forbidden in identifier #{name.inspect}"
+			end
+		end
+
 	end
 end

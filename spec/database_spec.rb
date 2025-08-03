@@ -21,8 +21,13 @@ RSpec.describe AssetDB::Database do
 		expect(db.group('g1').packages.map(&:id)).to contain_exactly('p1')
 	end
 
-	it 'rejects "/" in identifiers' do
+	it 'rejects separator in identifiers' do
 		expect { db.group('bad/name') }.to raise_error(AssetDB::Errors::InvalidIdentifierError)
 		expect { db.group('g').package('bad/name') }.to raise_error(AssetDB::Errors::InvalidIdentifierError)
+		db.separator = '|'
+		expect { db.group('bad/name') }.not_to raise_error
+		expect { db.group('g').package('bad/name') }.not_to raise_error
+		expect { db.group('bad|name') }.to raise_error(AssetDB::Errors::InvalidIdentifierError)
+		expect { db.group('g').package('bad|name') }.to raise_error(AssetDB::Errors::InvalidIdentifierError)
 	end
 end
