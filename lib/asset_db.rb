@@ -18,7 +18,7 @@ module AssetDB
 	#     # ...
 	#   end
 	def self.build(types: nil, basepath: nil, &block)
-		db = Database.new(asset_types: types, base_path: basepath)
+		db = Database.new(asset_types: types, basepath: basepath)
 		yield db if block
 		db
 	end

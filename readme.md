@@ -46,7 +46,7 @@ dropdown = db.group('features').package('dropdown')
 ```ruby
 require 'asset_db'
 
-db = AssetDB.build(asset_types: %i[css js], base_path: '/assets/:type/:group/:package') do |d|
+db = AssetDB.build(asset_types: %i[css js], basepath: '/assets/:type/:group/:package') do |d|
 	d.group 'features' do |g|
 		g.package 'dropdown' do |p|
 			p.asset :css, 'drop.css'
@@ -74,7 +74,7 @@ end
 
 ## URL Building & Folder Overrides
 
-The `base_path` setting lets you define a path string with placeholders `:type`, `:group`, `:package` that will be prepended to any relative asset paths.
+The `basepath` setting lets you define a path string with placeholders `:type`, `:group`, `:package` that will be prepended to any relative asset paths.
 
   * `:type`: asset type (`css`, `js`, etc.)
   * `:group`: group id or folder
@@ -106,3 +106,9 @@ combined = db.unify(base, dropdown, other)
 packages = [base, dropdown, other]
 combined = db.unify(*packages)
 ```
+
+## Development
+
+Run `rspec` to test.
+
+Run `gem build` to build the gem.
