@@ -4,7 +4,7 @@ require_relative 'spec_helper'
 
 RSpec.describe 'URL builder' do
 	let(:basepath) { '/assets/:type/:group/:package' }
-	let(:db)       { AssetDB::Database.new(base_path: basepath) }
+	let(:db)       { AssetDB::Database.new(basepath: basepath) }
 
 	context 'protocol URLs' do
 		it 'returns unchanged when protocol present' do

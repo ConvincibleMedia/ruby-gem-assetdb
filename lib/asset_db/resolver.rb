@@ -88,7 +88,7 @@ module AssetDB
 
 			def initialize(database, pkgs)
 				@database = database
-				@packages = pkgs.map(&:itself).uniq
+				@packages = Array(pkgs).uniq
 				@cache    = {} # {[type, key] ⇒ [Asset]}
 			end
 

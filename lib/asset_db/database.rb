@@ -6,12 +6,12 @@ module AssetDB
 	class Database
 		CONFIG_RESERVED = %w[types basepath folders].freeze
 
-		attr_reader :asset_types, :base_path, :groups, :resolver
+		attr_reader :asset_types, :basepath, :groups, :resolver
 		attr_accessor :separator
 
-		def initialize(asset_types: nil, base_path: nil)
+		def initialize(asset_types: nil, basepath: nil)
 			@asset_types = (asset_types&.map(&:to_sym) || %i[css js]).freeze
-			@base_path   = (base_path || '').dup
+			@basepath   = (basepath || '').dup
 			@separator   = nil
 			@groups      = {} # {id ⇒ Group}
 			@resolver    = Resolver.new(self)
@@ -49,7 +49,7 @@ module AssetDB
 
 			group  = asset.group
 			package = asset.package
-			path = @base_path.dup
+			path = @basepath.dup
 			unless path.empty?
 				path.gsub!(':type',    asset.type.to_s)
 				path.gsub!(':group',   group.folder_segment.to_s)
@@ -66,7 +66,7 @@ module AssetDB
 		# ---------------  Config loader ---------------
 		def self.from_config(cfg)
 			cfg = cfg.transform_keys(&:to_s)
-			db  = new(asset_types: cfg['types'], base_path: cfg['basepath'])
+			db  = new(asset_types: cfg['types'], basepath: cfg['basepath'])
 
 			folders_map = (cfg['folders'] || {}).transform_keys(&:to_s).dup
 			if sep = folders_map.delete('separator')
@@ -101,7 +101,7 @@ module AssetDB
 					p_spec.each do |k, v|
 						key = k.to_s
 						if db.asset_types.include?(key.to_sym)              # ASSETS
-							Array(v).each { |url| pkg.asset(key, url) }
+							Array(v).each { |url| pkg.asset(key, url == true ? p_id + '.' + key : url) }
 						else                                                # DEPENDENCIES
 							Array(v).each { |target_pkg| pkg.depends_on(target_pkg, group_id: key) }
 						end
@@ -114,7 +114,14 @@ module AssetDB
 
 		# Unify any number (≥2) of Package or PackageCollection into one collection
 		def unify(*items)
-			raise ArgumentError, "unify requires ≥2 packages/collections" if items.size < 2
+			# Simple returns
+			if items.empty?
+				return nil
+			elsif items.size == 1
+				return Resolver::PackageCollection.new(self, items.first)
+			end
+
+			# Combine packages
 			merged = items.flat_map do |i|
 			case i
 				when Resolver::PackageCollection
